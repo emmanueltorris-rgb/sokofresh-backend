@@ -23,7 +23,7 @@ def normalize_mpesa_phone(phone):
     if digits.startswith('7') and len(digits) == 9:
         return f'254{digits}'
     if digits.startswith('2540') and len(digits) == 13:
-        return digits[1:]
+        return f'254{digits[4:]}'
     return None
 
 
