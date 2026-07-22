@@ -1,8 +1,9 @@
 from datetime import timedelta
+from decimal import Decimal
 from django.db.models import Sum
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -111,6 +112,42 @@ class OrderListView(APIView):
             orders = Order.objects.filter(buyer=user)
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
+
+    def post(self, request):
+        user = request.user
+        total_amount = request.data.get('total_amount')
+        delivery_address = request.data.get('delivery_address', '')
+        delivery_notes = request.data.get('delivery_notes', '')
+
+        if total_amount is None:
+            return Response(
+                {'error': 'total_amount is required.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            total_amount = Decimal(str(total_amount))
+        except Exception:
+            return Response(
+                {'error': 'total_amount must be a valid number.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        order_number = request.data.get(
+            'order_number',
+            f"ORD-{timezone.now().strftime('%Y%m%d%H%M%S')}-{user.id}",
+        )
+
+        order = Order.objects.create(
+            buyer=user,
+            order_number=order_number,
+            total_amount=total_amount,
+            delivery_address=delivery_address,
+            delivery_notes=delivery_notes,
+            status='PENDING',
+        )
+        serializer = OrderSerializer(order)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class OrderDetailView(APIView):

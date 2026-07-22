@@ -21,6 +21,8 @@ class Order(models.Model):
     buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     order_number = models.CharField(max_length=50)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    delivery_address = models.TextField(blank=True)
+    delivery_notes = models.TextField(blank=True)
     status = models.CharField(max_length=50, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -66,6 +66,8 @@ class OrderSerializer(serializers.ModelSerializer):
             'status',
             'status_display',
             'total_amount',
+            'delivery_address',
+            'delivery_notes',
             'items',
         ]
 
